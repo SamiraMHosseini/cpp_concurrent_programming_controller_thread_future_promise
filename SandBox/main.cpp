@@ -31,7 +31,10 @@ struct ThreadCount
 		--this->counter;
 		Debug::out("~TC() %d \n", this->counter);
 
-		
+		if (ThreadCount::counter == 0)
+		{
+			cv_thread_count.notify_one();
+		}
 
 	}
 	/*
@@ -262,7 +265,8 @@ public:
 		std::unique_lock<std::mutex> lock(controllerResource.mtx);
 		controllerResource.cv.wait(lock, [&]() {return controllerResource.controllerFlag; });
 		sharedResource.prms.set_value();
-
+		std::unique_lock<std::mutex> lockTC(ThreadCount::mtx);
+		ThreadCount::cv_thread_count.wait(lockTC);
 
 
 	}
